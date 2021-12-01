@@ -22,7 +22,7 @@ chai.use(chaiAsPromised);
       });
 
       it("set 'навушники' as search string properly", async () => {
-        const searchWord = "навушники"
+        const searchWord = "Навушники"
         await page.setSearchFieldValue(searchWord)
         const fieldValue = await page.getSearchFieldValue()
         expect(fieldValue).to.equal(searchWord)
@@ -30,23 +30,29 @@ chai.use(chaiAsPromised);
 
 
       it("search 'навушники' properly", async () => {
-        const searchWord = "навушники"
+        const searchWord = "Навушники"
         await page.setSearchFieldValue(searchWord)
         await page.triggerSearchButtonClick()
-        page.getProductsTextArray()
-          .then((productsText) => {
-            productsText.forEach((text) => {
-              expect(text).to.equal(searchWord)
-            })
-          })
+        const products = await page.getProductsArray()
+        for (let i = 0; i < products.length; i++) {
+          const text = await products[i].getText()
+          expect(text).to.contain(searchWord)
+        }
       });
 
       it("it filters products", async () => {
-        const searchWord = "навушники"
+        const searchWord = "Навушники"
+        const filterText = '1more'
         await page.setSearchFieldValue(searchWord)
         await page.triggerSearchButtonClick()
-        await page.selectFilterCheckbox(0)
-        expect(true).to.equal(true)
+        const checkbox = await page.selectFilterCheckbox()
+        const filterElemText = await checkbox.getText()
+        expect(filterElemText).to.contain(filterText)
+        const products = await page.getProductsArray()
+        for (let i = 0; i < products.length; i++) {
+          const text = await products[i].getText()
+          expect(text).to.contain(filterText)
+        }
       })
     });
   } catch (err) {

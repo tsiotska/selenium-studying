@@ -5,7 +5,7 @@ class MainPage extends BasePage {
   getSearchField = () => this.findByName(locators.searchFieldName);
   getSearchButton = () => this.findByXpath(locators.searchButtonXPath);
   getProducts = () => this.findMultipleByClassName(locators.productsClass);
-  getFilterElement = () => this.findMultipleByCssSelector(locators.filterCheckboxCssSelector);
+  getFilterElement = () => this.findByXpath(locators.filterCheckboxXPath);
 
   async setSearchFieldValue(searchWord) {
     await this.write(await this.getSearchField(), searchWord)
@@ -21,21 +21,16 @@ class MainPage extends BasePage {
     })
   }
 
-  async getProductsTextArray() {
-    return this.getProducts().then((products) => {
-      products.map(async (product) => {
-        return await product.getText()
-      })
-    })
+  async getProductsArray() {
+    return await new this.getProducts()
   }
 
-  selectFilterCheckbox(elementPosition) {
-    this.getFilterElement(elementPosition).then((checkbox) => {
-      console.log('checkbox');
-      console.log(checkbox);
-      console.log(checkbox[elementPosition]);
-      checkbox[elementPosition].click()
-    })
+  async selectFilterCheckbox() {
+    const checkbox = await this.getFilterElement()
+    await checkbox.click()
+    // викидає StaleReferenceException, який я не можу пофіксити
+    // await this.driver.sleep(5000)
+    return checkbox
   }
 }
 
