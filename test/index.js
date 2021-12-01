@@ -1,7 +1,8 @@
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require('chai-as-promised');
-const Page = require('../lib/basePage')
+const Page = require('../pageObjects/mainPageObject')
+
 chai.use(chaiAsPromised);
 
 (async function example() {
@@ -22,27 +23,31 @@ chai.use(chaiAsPromised);
 
       it("set 'навушники' as search string properly", async () => {
         const searchWord = "навушники"
-        const searchField = await page.findByName("q")
-        await searchField.sendKeys(searchWord)
-        const fieldValue = await searchField.getAttribute("value")
+        await page.setSearchFieldValue(searchWord)
+        const fieldValue = await page.getSearchFieldValue()
         expect(fieldValue).to.equal(searchWord)
       });
 
 
       it("search 'навушники' properly", async () => {
         const searchWord = "навушники"
-        const searchField = await page.findByName("q")
-        await searchField.sendKeys(searchWord)
-        const searchButton = await page.findByXpath("//button[contains(text(),'Пошук')]")
-        await searchButton.click()
-        const products = await page.findMultipleByClassName('loop__container')
-        products.forEach(async (product) => {
-          const text = await product.getText()
-          console.log('text');
-          console.log(text);
-          expect(text).to.equal(searchWord)
-        })
+        await page.setSearchFieldValue(searchWord)
+        await page.triggerSearchButtonClick()
+        page.getProductsTextArray()
+          .then((productsText) => {
+            productsText.forEach((text) => {
+              expect(text).to.equal(searchWord)
+            })
+          })
       });
+
+      it("it filters products", async () => {
+        const searchWord = "навушники"
+        await page.setSearchFieldValue(searchWord)
+        await page.triggerSearchButtonClick()
+        await page.selectFilterCheckbox(0)
+        expect(true).to.equal(true)
+      })
     });
   } catch (err) {
     console.log(new Error(err.message));
